@@ -26,10 +26,18 @@ G_BEGIN_DECLS
 #define FLUTTER_PLUGIN_EXPORT
 #endif
 
-G_DECLARE_FINAL_TYPE(FlColorPanelPlugin, fl_color_panel_plugin, FL,
-                     COLOR_PANEL_PLUGIN, GObject)
+#define COLOR_PANEL_PLUGIN(obj)                                     \
+  (G_TYPE_CHECK_INSTANCE_CAST((obj), color_panel_plugin_get_type(), \
+                              ColorPanelPlugin))
 
-FLUTTER_PLUGIN_EXPORT FlColorPanelPlugin* fl_color_panel_plugin_new(
+typedef struct _ColorPanelPlugin ColorPanelPlugin;
+typedef struct {
+  GObjectClass parent_class;
+} ColorPanelPluginClass;
+
+FLUTTER_PLUGIN_EXPORT GType color_panel_plugin_get_type();
+
+FLUTTER_PLUGIN_EXPORT ColorPanelPlugin* color_panel_plugin_new(
     FlPluginRegistrar* registrar);
 
 FLUTTER_PLUGIN_EXPORT void color_panel_plugin_register_with_registrar(

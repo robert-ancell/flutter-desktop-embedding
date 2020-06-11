@@ -30,7 +30,7 @@ const char kColorComponentBlueKey[] = "blue";
 
 static constexpr char kWindowTitle[] = "Flutter Color Picker";
 
-struct _FlColorPanelPlugin {
+struct _ColorPanelPlugin {
   GObject parent_instance;
 
   FlPluginRegistrar* registrar;
@@ -42,10 +42,10 @@ struct _FlColorPanelPlugin {
   GtkColorChooserDialog* color_chooser_dialog;
 };
 
-G_DEFINE_TYPE(FlColorPanelPlugin, fl_color_panel_plugin, g_object_get_type())
+G_DEFINE_TYPE(ColorPanelPlugin, color_panel_plugin, G_TYPE_OBJECT)
 
 // Destroys any open color chooser dialog.
-static void destroy_color_chooser_dialog(FlColorPanelPlugin* self) {
+static void destroy_color_chooser_dialog(ColorPanelPlugin* self) {
   if (self->color_chooser_dialog == nullptr) return;
 
   gtk_widget_destroy(GTK_WIDGET(self->color_chooser_dialog));
@@ -53,7 +53,7 @@ static void destroy_color_chooser_dialog(FlColorPanelPlugin* self) {
 }
 
 // Called when a color chooser dialog responds.
-static void color_chooser_response_cb(FlColorPanelPlugin* self,
+static void color_chooser_response_cb(ColorPanelPlugin* self,
                                       gint response_id) {
   if (response_id == GTK_RESPONSE_OK) {
     GdkRGBA color;
@@ -79,7 +79,7 @@ static void color_chooser_response_cb(FlColorPanelPlugin* self,
 }
 
 // Shows a color panel.
-static FlMethodResponse* show_color_panel(FlColorPanelPlugin* self,
+static FlMethodResponse* show_color_panel(ColorPanelPlugin* self,
                                           FlValue* args) {
   // There is only one color panel that can be displayed at once.
   // There are no channels to use the color panel, so just return.
@@ -108,7 +108,7 @@ static FlMethodResponse* show_color_panel(FlColorPanelPlugin* self,
 }
 
 // Hides the color panel.
-static FlMethodResponse* hide_color_panel(FlColorPanelPlugin* self) {
+static FlMethodResponse* hide_color_panel(ColorPanelPlugin* self) {
   destroy_color_chooser_dialog(self);
   return FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
 }
@@ -116,7 +116,7 @@ static FlMethodResponse* hide_color_panel(FlColorPanelPlugin* self) {
 // Called when a method call is received from Flutter.
 static void method_call_cb(FlMethodChannel* channel, FlMethodCall* method_call,
                            gpointer user_data) {
-  FlColorPanelPlugin* self = FL_COLOR_PANEL_PLUGIN(user_data);
+  ColorPanelPlugin* self = COLOR_PANEL_PLUGIN(user_data);
 
   const gchar* method = fl_method_call_get_name(method_call);
   FlValue* args = fl_method_call_get_args(method_call);
@@ -135,25 +135,25 @@ static void method_call_cb(FlMethodChannel* channel, FlMethodCall* method_call,
     g_warning("Failed to send method call response: %s", error->message);
 }
 
-static void fl_color_panel_plugin_dispose(GObject* object) {
-  FlColorPanelPlugin* self = FL_COLOR_PANEL_PLUGIN(object);
+static void color_panel_plugin_dispose(GObject* object) {
+  ColorPanelPlugin* self = COLOR_PANEL_PLUGIN(object);
 
   g_clear_object(&self->registrar);
   g_clear_object(&self->channel);
   destroy_color_chooser_dialog(self);
 
-  G_OBJECT_CLASS(fl_color_panel_plugin_parent_class)->dispose(object);
+  G_OBJECT_CLASS(color_panel_plugin_parent_class)->dispose(object);
 }
 
-static void fl_color_panel_plugin_class_init(FlColorPanelPluginClass* klass) {
-  G_OBJECT_CLASS(klass)->dispose = fl_color_panel_plugin_dispose;
+static void color_panel_plugin_class_init(ColorPanelPluginClass* klass) {
+  G_OBJECT_CLASS(klass)->dispose = color_panel_plugin_dispose;
 }
 
-static void fl_color_panel_plugin_init(FlColorPanelPlugin* self) {}
+static void color_panel_plugin_init(ColorPanelPlugin* self) {}
 
-FlColorPanelPlugin* fl_color_panel_plugin_new(FlPluginRegistrar* registrar) {
-  FlColorPanelPlugin* self = FL_COLOR_PANEL_PLUGIN(
-      g_object_new(fl_color_panel_plugin_get_type(), nullptr));
+ColorPanelPlugin* color_panel_plugin_new(FlPluginRegistrar* registrar) {
+  ColorPanelPlugin* self =
+      COLOR_PANEL_PLUGIN(g_object_new(color_panel_plugin_get_type(), nullptr));
 
   self->registrar = FL_PLUGIN_REGISTRAR(g_object_ref(registrar));
 
@@ -168,6 +168,6 @@ FlColorPanelPlugin* fl_color_panel_plugin_new(FlPluginRegistrar* registrar) {
 }
 
 void color_panel_plugin_register_with_registrar(FlPluginRegistrar* registrar) {
-  FlColorPanelPlugin* plugin = fl_color_panel_plugin_new(registrar);
+  ColorPanelPlugin* plugin = color_panel_plugin_new(registrar);
   g_object_unref(plugin);
 }
